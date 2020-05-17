@@ -47,15 +47,42 @@ class Player(pygame.sprite.Sprite):
         if self.rect.left < 0:
             self.rect.left = 0
 
+class Mob(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image=pygame.Surface((30,40))
+        self.image.fill(red)
+        self.rect=self.image.get_rect()
+        self.rect.x=random.randrange(WIDTH-self.rect.width)
+        self.rect.y=random.randrange(-100,-40)
+        self.speedy=random.randrange(1,8)
+        self.speedx=random.randrange(-3,3)
+
+    def update(self):
+            self.rect.y+=self.speedy
+            self.rect.x+=self.speedx
+            if self.rect.top > HEIGHT + 10 or self.rect.left < -25 or self.rect.right > WIDTH + 20:
+                self.rect.x=random.randrange(WIDTH-self.rect.width)
+                self.rect.y=random.randrange(-100,-40)
+                self.speedy=random.randrange(1,8)
+
+                
+
 
 
 
 all_sprites=pygame.sprite.Group()
 player=Player()
 all_sprites.add(player)
+mobs=pygame.sprite.Group()
+mob=Mob()
+for i in range(8):
+    m=Mob()
+    all_sprites.add(m)
+    mobs.add(m)
+    
 gameLoop=True
 
-        
 while gameLoop:
     
     for event in pygame.event.get():
@@ -65,6 +92,10 @@ while gameLoop:
     all_sprites.update()
     surface.fill(black)
     all_sprites.draw(surface)
+    hits=pygame.sprite.spritecollide(player,mobs,False)
+    if hits:
+        gameLoop=False
+    
     pygame.display.flip()
     clock.tick(fps)
 pygame.quit()

@@ -10,6 +10,7 @@ red=(255,0,0)
 green=(0,255,0)
 blue=(0,0,255)
 white=(255,255,255)
+yellow=(255,255,0)
 WIDTH=480
 HEIGHT=600
 
@@ -47,6 +48,11 @@ class Player(pygame.sprite.Sprite):
         if self.rect.left < 0:
             self.rect.left = 0
 
+    def shoot(self):
+        bull=bullet(self.rect.centerx,self.rect.top)
+        all_sprites.add(bull)
+        bullets.add(bull)
+
 class Mob(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -67,9 +73,23 @@ class Mob(pygame.sprite.Sprite):
                 self.speedy=random.randrange(1,8)
 
                 
+class bullet(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((10, 20))
+        self.image.fill(yellow)
+        self.rect = self.image.get_rect()
+        self.rect.bottom = y
+        self.rect.centerx = x
+        self.speedy = -10
 
 
 
+    def update(self):
+        self.rect.y += self.speedy
+        # kill if it moves off the top of the screen
+        if self.rect.bottom < 0:
+            self.kill()
 
 all_sprites=pygame.sprite.Group()
 player=Player()
@@ -80,17 +100,28 @@ for i in range(8):
     m=Mob()
     all_sprites.add(m)
     mobs.add(m)
-    
+
+bullets=pygame.sprite.Group()   
 gameLoop=True
+
+
 
 while gameLoop:
     
     for event in pygame.event.get():
             if event.type==pygame.QUIT:
                 gameLoop=False
+            elif event.type==pygame.KEYDOWN:
+                if event.key==pygame.K_SPACE:
+                    player.shoot()
 
     all_sprites.update()
     surface.fill(black)
+    hits = pygame.sprite.groupcollide(mobs, bullets, True, True)
+    for hit in hits:
+        m = Mob()
+        all_sprites.add(m)
+        mobs.add(m)
     all_sprites.draw(surface)
     hits=pygame.sprite.spritecollide(player,mobs,False)
     if hits:

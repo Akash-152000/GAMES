@@ -1,5 +1,6 @@
 import pygame
 import random
+import time
 pygame.init()
 
 
@@ -16,8 +17,12 @@ HEIGHT=600
 
 fps= 60
 clock=pygame.time.Clock()
+spaceship=pygame.image.load("playerShip3_orange.png")
+#background=pygame.image.load("blue.png")
+#background_image=background.get_rect()
+laser=pygame.image.load("laserGreen10.png")
+meteor=pygame.image.load("meteorBrown_big4.png")
 
-        
 surface=pygame.display.set_mode((WIDTH,HEIGHT))
 pygame.display.set_caption("Template")
 pygame.mixer.init()
@@ -27,9 +32,11 @@ pygame.mixer.init()
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface((50, 40))
-        self.image.fill(green)
+        self.image=pygame.transform.scale(spaceship,(50,38))
+        self.image.set_colorkey(black)
         self.rect = self.image.get_rect()
+        self.radius=20
+        #pygame.draw.circle(self.image,red,self.rect.center,self.radius)
         self.rect.centerx = WIDTH / 2
         self.rect.bottom = HEIGHT - 10
         self.speedx = 0
@@ -56,9 +63,11 @@ class Player(pygame.sprite.Sprite):
 class Mob(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image=pygame.Surface((30,40))
-        self.image.fill(red)
-        self.rect=self.image.get_rect()
+        self.image=pygame.transform.scale(meteor,(30,40))
+        self.image.set_colorkey(black)
+        self.rect = self.image.get_rect()
+        self.radius= int(self.rect.width * .85 / 2)
+        #pygame.draw.circle(self.image,red,self.rect.center,self.radius)
         self.rect.x=random.randrange(WIDTH-self.rect.width)
         self.rect.y=random.randrange(-100,-40)
         self.speedy=random.randrange(1,8)
@@ -76,8 +85,8 @@ class Mob(pygame.sprite.Sprite):
 class bullet(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface((10, 20))
-        self.image.fill(yellow)
+        self.image =pygame.transform.scale(laser,(10,20))
+        self.image.set_colorkey(black)
         self.rect = self.image.get_rect()
         self.rect.bottom = y
         self.rect.centerx = x
@@ -114,16 +123,21 @@ while gameLoop:
             elif event.type==pygame.KEYDOWN:
                 if event.key==pygame.K_SPACE:
                     player.shoot()
+                elif event.type==pygame.K_UP:
+                    pygame.time.delay(3000)
+                    
 
     all_sprites.update()
     surface.fill(black)
+    #surface.blit(background,(0,0,WIDTH,HEIGHT))
+    
     hits = pygame.sprite.groupcollide(mobs, bullets, True, True)
     for hit in hits:
         m = Mob()
         all_sprites.add(m)
         mobs.add(m)
     all_sprites.draw(surface)
-    hits=pygame.sprite.spritecollide(player,mobs,False)
+    hits=pygame.sprite.spritecollide(player,mobs,False,pygame.sprite.collide_circle)
     if hits:
         gameLoop=False
     
